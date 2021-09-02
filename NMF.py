@@ -9,95 +9,103 @@ import numpy as np
 # Mientras que lo estoy desarrollando lo estoy haciendo dentro del main con valores que yo le asigno
 
 def NMF(V, n_iter, k):
-    V = np.array(V)
-    V_ = tf.constant(V)
+    try:
+        V = np.array(V)
+        V_ = tf.constant(V)
 
-    # m,n tamaño de mi matriz
-    m, n = V.shape
+        # m,n tamaño de mi matriz
+        m, n = V.shape
 
-    # Creo las matrices W y H (las inicializo aleatoriamente)
-    W1, H1 = utils.random_initialization(m, n, k)
 
-    # creo las variables en tensorflow
-    H = tf.Variable(H1)
-    W = tf.Variable(W1)
+        # Creo las matrices W y H (las inicializo aleatoriamente)
+        W1, H1 = utils.random_initialization(m, n, k)
 
-    # Multiplicative Update (MU ALGORITMO)
+        # creo las variables en tensorflow
+        H = tf.Variable(H1)
+        W = tf.Variable(W1)
 
-    # Realizamos las transformaciones en la matriz H
-    Wt = tf.transpose(W)
-    W_update = tf.matmul(Wt, V_) / tf.matmul(tf.matmul(Wt, W), H)
+        # Multiplicative Update (MU ALGORITMO)
 
-    # Elimino los resultados Nan y los cambio por 0
-    W_update = tf.where(tf.math.is_nan(W_update), tf.zeros_like(W_update), W_update)
+        # Realizamos las transformaciones en la matriz H
+        Wt = tf.transpose(W)
+        W_update = tf.matmul(Wt, V_) / tf.matmul(tf.matmul(Wt, W), H)
 
-    H_new = H * W_update
-    H = H.assign(H_new)
+        # Elimino los resultados Nan y los cambio por 0
+        W_update = tf.where(tf.math.is_nan(W_update), tf.zeros_like(W_update), W_update)
 
-    # Realizamos las mismas transformaciones pero esta veaz para W
+        H_new = H * W_update
+        H = H.assign(H_new)
 
-    Ht = tf.transpose(H)
+        # Realizamos las mismas transformaciones pero esta veaz para W
 
-    H_update = tf.matmul(V_, Ht) / tf.matmul(W, tf.matmul(H, Ht))
+        Ht = tf.transpose(H)
 
-    H_update = tf.where(tf.math.is_nan(H_update), tf.zeros_like(H_update), H_update)
+        H_update = tf.matmul(V_, Ht) / tf.matmul(W, tf.matmul(H, Ht))
 
-    W_new = W * H_update
-    W = W.assign(W_new)
+        H_update = tf.where(tf.math.is_nan(H_update), tf.zeros_like(H_update), H_update)
 
-    V = tf.matmul(W, H)
+        W_new = W * H_update
+        W = W.assign(W_new)
 
-    if n_iter > 0:
-        n_iter -= 1
-        V = NMF(V, n_iter, k)
+        V = tf.matmul(W, H)
+
+        if n_iter > 0:
+            n_iter -= 1
+            V = NMF(V, n_iter, k)
+
+    except:
+        print("Matriz invalida, probablemente vacia")
 
     return V
 
 def nsNMF(V, n_iter, k):
-    V = np.array(V)
-    V_ = tf.constant(V)
+    try:
+        V = np.array(V)
+        V_ = tf.constant(V)
 
-    # m,n tamaño de mi matriz
-    m, n = V.shape
+        # m,n tamaño de mi matriz
+        m, n = V.shape
 
-    # Creo las matrices W y H (las inicializo aleatoriamente)
-    W1, H1 = utils.random_initialization(m, n, k)
+        # Creo las matrices W y H (las inicializo aleatoriamente)
+        W1, H1 = utils.random_initialization(m, n, k)
 
-    # creo las variables en tensorflow
-    H = tf.Variable(H1)
-    W = tf.Variable(W1)
+        # creo las variables en tensorflow
+        H = tf.Variable(H1)
+        W = tf.Variable(W1)
 
-    # Multiplicative Update (MU ALGORITMO)
+        # Multiplicative Update (MU ALGORITMO)
 
-    # Realizamos las transformaciones en la matriz H
-    Wt = tf.transpose(W)
-    W_update = tf.matmul(Wt, V_) / tf.matmul(tf.matmul(Wt, W), H)
+        # Realizamos las transformaciones en la matriz H
+        Wt = tf.transpose(W)
+        W_update = tf.matmul(Wt, V_) / tf.matmul(tf.matmul(Wt, W), H)
 
-    # Elimino los resultados Nan y los cambio por 0
-    W_update = tf.where(tf.math.is_nan(W_update), tf.zeros_like(W_update), W_update)
+        # Elimino los resultados Nan y los cambio por 0
+        W_update = tf.where(tf.math.is_nan(W_update), tf.zeros_like(W_update), W_update)
 
-    H_new = H * W_update
-    H = H.assign(H_new)
+        H_new = H * W_update
+        H = H.assign(H_new)
 
-    # Realizamos las mismas transformaciones pero esta veaz para W
+        # Realizamos las mismas transformaciones pero esta veaz para W
 
-    Ht = tf.transpose(H)
+        Ht = tf.transpose(H)
 
-    H_update = tf.matmul(V_, Ht) / tf.matmul(W, tf.matmul(H, Ht))
+        H_update = tf.matmul(V_, Ht) / tf.matmul(W, tf.matmul(H, Ht))
 
-    H_update = tf.where(tf.math.is_nan(H_update), tf.zeros_like(H_update), H_update)
+        H_update = tf.where(tf.math.is_nan(H_update), tf.zeros_like(H_update), H_update)
 
-    W_new = W * H_update
-    W = W.assign(W_new)
+        W_new = W * H_update
+        W = W.assign(W_new)
 
-    S = smooth_matrix(k, 0.2)
+        S = smooth_matrix(k, 0.2)
 
-    V = tf.matmul(tf.matmul(W, S), H)
+        V = tf.matmul(tf.matmul(W, S), H)
 
-    if n_iter > 0:
-        n_iter -= 1
-        V = NMF(V, n_iter, k)
+        if n_iter > 0:
+            n_iter -= 1
+            V = NMF(V, n_iter, k)
 
+    except:
+        print("Matriz invalida, probablemente vacia")
     return V
 
 

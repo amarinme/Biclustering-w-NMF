@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from numpy import dtype
+import pandas as pd
 
 
 def print_matrix(matrix):
@@ -24,34 +24,43 @@ def convert_numbers_to_float(matrix):
 def delete_negative_rows(matrix):
     # Eliminar las lineas con elementos negativos para cumplir la condicion de non Negatividad
     start = len(matrix)
+    lista = []
 
     for row in matrix:
+        negative_exist = False
+
         for element in row[1:]:
+
             if element < .0:
-                matrix.pop(matrix.index(row))
+                negative_exist = True
                 break
 
-    end = len(matrix)
+        if not negative_exist:
+            lista.append(row)
 
-    print("Number of negative rows -> ", start - end)
+
+    end = len(lista)
+
+    print("Número de filas negativas -> ", start - end)
     if end < 100:
         print("WARNING! Your Non Negative Matrix is very small, Total rows -> ", end)
 
-    return matrix
-
+    return lista
 
 def change_negative_numbers(matrix):
     # Cada elemento negativo lo cambio por el numero 0
     count = 0
+    count_elements = 0
     for row in matrix:
         for element in row:
+            count_elements +=1
             if element < .0:
                 i = matrix.index(row)
                 j = row.index(element)
                 matrix[i][j] = 0.0
                 count +=1
 
-    print("Se han localizado un total de " + str(count) + " elementos negativos")
+    print("De ", count_elements, " en total -> ", count, " son negativos")
     return matrix
 
 
@@ -66,8 +75,7 @@ def obtain_labels(matrix):
 def without_labels(matrix):
     # Metodo que elimina las etiquetas de cada linea
     final_matrix = []
-
-    for row in matrix[1:]:
+    for row in matrix:
         line = row[1:]
         final_matrix.append(line)
 
@@ -81,39 +89,24 @@ def random_initialization(m, n, k):
     return W, H
 
 
-# def add_genes(matrix, genes):
-#     # Metodo que elimina las etiquetas de cada lista
-#     # Labels es una lista en la que guardo todas las etiquetas de cada fila
-#     final_matrix = []
-#     i = 0
-#     for row in matrix[1:]:
-#         line = row.insert(0, genes(i))
-#         final_matrix.append(line)
-#         i += 1
-#     return final_matrix
-
-
 def add_labels(matrix, genes, conditions):
-    # Metodo que añade al array las etiquetas de los genes y de las matrices
-    #Problema encontrado me indica que el dtype no es el mismo
-
-    # Guardo la matriz en un fichero
-    fileName = "output_data/Final_Result(Prueba).txt"
+    # Añade la cabecera con las condiciones y los genes
+    fileName = "output_data/auxiliar.txt"
     np.savetxt(fileName, matrix)
-    conditions = conditions[1:]
-    conditions = tf.constant(conditions)
+    matrix = np.loadtxt(fileName, dtype=str)
 
-    # En aux es donde voy a crear mi nueva matrix con etiquetas, por lo que añado la primera file
-    aux = [conditions]
+    final = pd.DataFrame(matrix, index=genes, columns=conditions)
+    return final
 
-    # Extraigo el fichero de nuevo con el formato que yo quiero
-    matrix_str = np.loadtxt(fileName, dtype=str)
-    matrix_str = tf.constant(matrix_str)
+def write_in_csv_file(df, nameFile):
+    # Escribimos el dataFrame en un fichero dado
+    df.to_csv(nameFile)
 
-    aux.append(matrix_str)
-
-    return aux
-
+def write_in_file(df, nameFile):
+    # Escribimos el dataFrame en un fichero dado
+    tfile = open(nameFile, 'w')
+    tfile.write(df.to_string())
+    tfile.close()
 
 def empty_list(l):
     res = True
@@ -122,14 +115,4 @@ def empty_list(l):
 
     return res
 
-# def from_file_to_matrix(nameFile):
-#     f = open(nameFile)
-#     lines = f.readlines()
-#
-#     matrix = []
-#     for l in lines:
-#         s = l.split("\t")
-#         matrix.append(s)
-#
-#     f.close()
-#     return matrix
+
